@@ -11,6 +11,9 @@ import {
   AlertTriangle,
   Trophy,
   ChevronDown,
+  Footprints,
+  ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,11 +26,14 @@ export const ControlPanel: React.FC = () => {
     clearAll,
     validate,
     resetLevel,
+    nextLevel,
     validationResult,
     isComplete,
     canUndo,
     canRedo,
     placedProducts,
+    steps,
+    isLastLevel,
   } = useGameStore();
 
   const [showLevelSelector, setShowLevelSelector] = useState(false);
@@ -132,7 +138,14 @@ export const ControlPanel: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">操作面板</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-gray-700">操作面板</h4>
+          <div className="flex items-center gap-1.5 text-sm">
+            <Footprints size={16} className="text-indigo-500" />
+            <span className="text-gray-500">步数:</span>
+            <span className="font-bold text-indigo-600 text-lg">{steps}</span>
+          </div>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <button
             onClick={undo}
@@ -208,6 +221,30 @@ export const ControlPanel: React.FC = () => {
         )}
       </button>
 
+      {isComplete && (
+        <button
+          onClick={nextLevel}
+          className={cn(
+            'w-full py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2',
+            isLastLevel
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:shadow-amber-200 hover:scale-[1.02]'
+              : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-200 hover:scale-[1.02]'
+          )}
+        >
+          {isLastLevel ? (
+            <>
+              <RefreshCw size={24} />
+              🏆 已通关全部关卡，再玩一次
+            </>
+          ) : (
+            <>
+              <ArrowRight size={24} />
+              进入下一关 →
+            </>
+          )}
+        </button>
+      )}
+
       {validationResult && (
         <div
           className={cn(
@@ -223,7 +260,9 @@ export const ControlPanel: React.FC = () => {
               <div>
                 <h4 className="font-bold text-green-800 text-lg">🎉 完美陈列！</h4>
                 <p className="text-green-600 text-sm">
-                  所有商品摆放位置都符合陈列规则，恭喜你顺利通关！
+                  {isLastLevel
+                    ? '太棒了！你已完成所有关卡！点击上方"再玩一次"可重新挑战。'
+                    : '所有商品摆放位置都符合陈列规则，点击上方按钮进入下一关！'}
                 </p>
               </div>
             </div>

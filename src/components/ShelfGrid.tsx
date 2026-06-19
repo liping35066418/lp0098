@@ -168,7 +168,10 @@ export const ShelfGrid: React.FC<ShelfGridProps> = ({ onDrop }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-6 shadow-xl border border-amber-200">
+    <div
+      className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-6 shadow-xl border border-amber-200"
+      onDragEnd={handleDragEnd}
+    >
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-lg font-bold text-amber-800">
           🛒 货架陈列区

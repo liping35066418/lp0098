@@ -9,6 +9,8 @@ interface GameState {
   historyIndex: number;
   validationResult: ValidationResult | null;
   isComplete: boolean;
+  steps: number;
+  isLastLevel: boolean;
   setCurrentLevel: (level: Level) => void;
   placeProduct: (product: Product, row: number, col: number) => boolean;
   removeProduct: (placedId: string) => void;
@@ -18,6 +20,7 @@ interface GameState {
   clearAll: () => void;
   validate: () => ValidationResult;
   resetLevel: () => void;
+  nextLevel: () => void;
   canUndo: boolean;
   canRedo: boolean;
 }
@@ -31,10 +34,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   historyIndex: 0,
   validationResult: null,
   isComplete: false,
+  steps: 0,
+  isLastLevel: levels[0].id === levels[levels.length - 1].id,
   canUndo: false,
   canRedo: false,
 
   setCurrentLevel: (level) => {
+    const levelIndex = levels.findIndex(l => l.id === level.id);
     set({
       currentLevel: level,
       placedProducts: [],
@@ -42,6 +48,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: 0,
       validationResult: null,
       isComplete: false,
+      steps: 0,
+      isLastLevel: levelIndex === levels.length - 1,
       canUndo: false,
       canRedo: false,
     });
@@ -77,6 +85,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newHistory.length - 1,
       validationResult: null,
       isComplete: false,
+      steps: get().steps + 1,
       canUndo: true,
       canRedo: false,
     });
@@ -85,7 +94,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   removeProduct: (placedId) => {
-    const { placedProducts, history, historyIndex } = get();
+    const { placedProducts, history, historyIndex, steps } = get();
     const newPlacedProducts = placedProducts.filter(p => p.id !== placedId);
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newPlacedProducts);
@@ -96,13 +105,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newHistory.length - 1,
       validationResult: null,
       isComplete: false,
+      steps: steps + 1,
       canUndo: true,
       canRedo: false,
     });
   },
 
   moveProduct: (placedId, newRow, newCol) => {
-    const { placedProducts, currentLevel, history, historyIndex } = get();
+    const { placedProducts, currentLevel, history, historyIndex, steps } = get();
 
     const isOccupied = placedProducts.some(
       p => p.row === newRow && p.col === newCol && p.id !== placedId
@@ -125,6 +135,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newHistory.length - 1,
       validationResult: null,
       isComplete: false,
+      steps: steps + 1,
       canUndo: true,
       canRedo: false,
     });
@@ -133,7 +144,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   undo: () => {
-    const { history, historyIndex } = get();
+    const { history, historyIndex, steps } = get();
     if (historyIndex <= 0) return;
 
     const newIndex = historyIndex - 1;
@@ -142,13 +153,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newIndex,
       validationResult: null,
       isComplete: false,
+      steps: steps - 1,
       canUndo: newIndex > 0,
       canRedo: true,
     });
   },
 
   redo: () => {
-    const { history, historyIndex } = get();
+    const { history, historyIndex, steps } = get();
     if (historyIndex >= history.length - 1) return;
 
     const newIndex = historyIndex + 1;
@@ -157,6 +169,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newIndex,
       validationResult: null,
       isComplete: false,
+      steps: steps + 1,
       canUndo: true,
       canRedo: newIndex < history.length - 1,
     });
@@ -175,6 +188,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: newHistory.length - 1,
       validationResult: null,
       isComplete: false,
+      steps: 0,
       canUndo: true,
       canRedo: false,
     });
@@ -275,8 +289,41 @@ export const useGameStore = create<GameState>((set, get) => ({
       historyIndex: 0,
       validationResult: null,
       isComplete: false,
+      steps: 0,
       canUndo: false,
       canRedo: false,
     });
+  },
+
+  nextLevel: () => {
+    const { currentLevel } = get();
+    const currentIndex = levels.findIndex(l => l.id === currentLevel.id);
+    if (currentIndex < levels.length - 1) {
+      const next = levels[currentIndex + 1];
+      const nextIndex = currentIndex + 1;
+      set({
+        currentLevel: next,
+        placedProducts: [],
+        history: [[]],
+        historyIndex: 0,
+        validationResult: null,
+        isComplete: false,
+        steps: 0,
+        isLastLevel: nextIndex === levels.length - 1,
+        canUndo: false,
+        canRedo: false,
+      });
+    } else {
+      set({
+        placedProducts: [],
+        history: [[]],
+        historyIndex: 0,
+        validationResult: null,
+        isComplete: false,
+        steps: 0,
+        canUndo: false,
+        canRedo: false,
+      });
+    }
   },
 }));

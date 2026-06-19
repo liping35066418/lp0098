@@ -10,6 +10,7 @@ interface ProductCardProps {
   onClick?: () => void;
   compact?: boolean;
   showInfo?: boolean;
+  isPlaced?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -19,6 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onClick,
   compact = false,
   showInfo = true,
+  isPlaced = false,
 }) => {
   const sizeLabel = {
     large: '大件',
@@ -33,22 +35,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     accessory: '配饰',
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    if (isPlaced) {
+      e.preventDefault();
+      return;
+    }
+    onDragStart?.(e);
+  };
+
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
+      draggable={!isPlaced}
+      onDragStart={handleDragStart}
       onClick={onClick}
       className={cn(
-        'relative cursor-grab active:cursor-grabbing rounded-xl border-2 p-3 transition-all duration-200',
-        'hover:shadow-lg hover:scale-105',
+        'relative rounded-xl border-2 p-3 transition-all duration-200',
+        isPlaced
+          ? 'opacity-40 grayscale cursor-not-allowed'
+          : 'cursor-grab active:cursor-grabbing hover:shadow-lg hover:scale-105',
         product.color,
         isDragging && 'opacity-50 scale-95',
         compact ? 'p-2 min-w-[80px]' : 'min-w-[100px]'
       )}
+      title={isPlaced ? '该商品已上架' : product.name}
     >
-      {product.isHot && (
+      {product.isHot && !isPlaced && (
         <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 z-10">
           <Flame size={12} />
+        </div>
+      )}
+
+      {isPlaced && (
+        <div className="absolute -top-2 -right-2 bg-gray-500 text-white rounded-full px-2 py-0.5 z-10 text-[10px] font-bold">
+          已上架
         </div>
       )}
       

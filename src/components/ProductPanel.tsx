@@ -8,13 +8,17 @@ import { cn } from '@/lib/utils';
 type FilterType = 'all' | 'large' | 'medium' | 'small' | 'hot';
 
 export const ProductPanel: React.FC = () => {
-  const { currentLevel } = useGameStore();
+  const { currentLevel, placedProducts } = useGameStore();
   const [filter, setFilter] = useState<FilterType>('all');
 
   const handleDragStart = (e: React.DragEvent, product: Product) => {
     e.dataTransfer.effectAllowed = 'move';
     const item: DragItem = { type: 'product', product };
     e.dataTransfer.setData('application/json', JSON.stringify(item));
+  };
+
+  const isProductPlaced = (productId: string) => {
+    return placedProducts.some(p => p.product.id === productId);
   };
 
   const filteredProducts = currentLevel.availableProducts.filter(p => {
@@ -70,6 +74,7 @@ export const ProductPanel: React.FC = () => {
             product={product}
             onDragStart={(e) => handleDragStart(e, product)}
             compact
+            isPlaced={isProductPlaced(product.id)}
           />
         ))}
       </div>
