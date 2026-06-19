@@ -53,6 +53,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const isOccupied = placedProducts.some(p => p.row === row && p.col === col);
     if (isOccupied) return false;
 
+    const isDuplicate = placedProducts.some(p => p.product.id === product.id);
+    if (isDuplicate) return false;
+
     if (row < 0 || row >= currentLevel.gridRows || col < 0 || col >= currentLevel.gridCols) {
       return false;
     }
@@ -194,7 +197,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 productName: product.name,
                 row,
                 col,
-                message: `${product.name} 是大件商品，需要放在底层（第${bottomRows}-${currentLevel.gridRows - 1}行）`,
+                message: `${product.name} 是大件商品，需要放在底层（行${bottomRows}到行${currentLevel.gridRows - 1}）`,
                 ruleType: rule.type,
               });
             }
@@ -210,7 +213,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 productName: product.name,
                 row,
                 col,
-                message: `${product.name} 需要放在上层（第0-${topRows - 1}行）`,
+                message: `${product.name} 需要放在上层（行0到行${topRows - 1}）`,
                 ruleType: rule.type,
               });
             }
@@ -226,7 +229,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 productName: product.name,
                 row,
                 col,
-                message: `${product.name} 是热门商品，需要放在靠前位置（第0-${frontCols - 1}列）`,
+                message: `${product.name} 是热门商品，需要放在靠前位置（列0到列${frontCols - 1}）`,
                 ruleType: rule.type,
               });
             }
@@ -235,7 +238,26 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
     }
 
-    const isValid = violations.length === 0 && placedProducts.length >= currentLevel.requiredPlacements;
+    const allRulesSatisfied = currentLevel.rules.every(rule => {
+      return placedProducts.some(placed => {
+        const { product, row, col } = placed;
+        if (rule.type === 'bottom-layer') {
+          const bottomRows = Math.floor(currentLevel.gridRows / 2);
+          return product.size === rule.targetSize && row >= bottomRows;
+        }
+        if (rule.type === 'top-layer') {
+          const topRows = Math.floor(currentLevel.gridRows / 2);
+          return product.category === rule.targetCategory && row < topRows;
+        }
+        if (rule.type === 'front-position') {
+          const frontCols = Math.floor(currentLevel.gridCols / 2);
+          return product.isHot && col < frontCols;
+        }
+        return false;
+      });
+    });
+
+    const isValid = violations.length === 0 && placedProducts.length >= currentLevel.requiredPlacements && allRulesSatisfied;
     const result: ValidationResult = { isValid, violations };
 
     set({

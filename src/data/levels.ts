@@ -11,17 +11,17 @@ export const levels: Level[] = [
     rules: [
       {
         type: 'bottom-layer',
-        description: '大件摆件必须放置在货架底层（第3-4行）',
+        description: '大件摆件必须放置在货架底层（行2到行3）',
         targetSize: 'large',
       },
       {
         type: 'top-layer',
-        description: '书签和明信片必须放置在上层（第0-1行）',
+        description: '书签和明信片必须放置在上层（行0到行1）',
         targetCategory: 'bookmark',
       },
       {
         type: 'top-layer',
-        description: '明信片必须放置在上层（第0-1行）',
+        description: '明信片必须放置在上层（行0到行1）',
         targetCategory: 'postcard',
       },
     ],
@@ -45,22 +45,22 @@ export const levels: Level[] = [
     rules: [
       {
         type: 'bottom-layer',
-        description: '大件摆件必须放置在货架底层（第3-4行）',
+        description: '大件摆件必须放置在货架底层（行2到行4）',
         targetSize: 'large',
       },
       {
         type: 'top-layer',
-        description: '书签和明信片必须放置在上层（第0-1行）',
+        description: '书签和明信片必须放置在上层（行0到行1）',
         targetCategory: 'bookmark',
       },
       {
         type: 'top-layer',
-        description: '明信片必须放置在上层（第0-1行）',
+        description: '明信片必须放置在上层（行0到行1）',
         targetCategory: 'postcard',
       },
       {
         type: 'front-position',
-        description: '热门商品必须放置在货架靠前位置（第0-1列）',
+        description: '热门商品必须放置在货架靠前位置（列0到列1）',
       },
     ],
     availableProducts: products,
